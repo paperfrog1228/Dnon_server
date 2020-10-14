@@ -1,4 +1,6 @@
-var io = require('socket.io').listen(1228);
+const WebSocket = require("ws");
+console.log("서버 시작");
+const ws = new WebSocket.Server({port : 1228});
 var vector2={x:0,y:0}//플레이어 위치
 class user {//유저 정보를 담고 있는 클래스
     constructor(socket) { 
@@ -23,7 +25,3 @@ function leaveGame(socket) {
     }
     delete ballMap[socket.id]; 
 }
-io.sockets.on("connection", function(socket){//새로운 유저 접속 시 이벤트
-    console.log('${socket.id} 입장하였습니다.');
-    let new_user=joinGame(socket);
-});
