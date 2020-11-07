@@ -10,16 +10,20 @@ wws.on("connection", function(ws) {
         let json=JSON.parse(message);
         switch(json.eventName) {
             case 'socketID':
-                joinGame(json);
+                joinGame(json,ws);
             break;
-            case 'position':
+            case 'position': //heartbeat 역할
                 updatePlayerPos(json);
+                updateOtherPos(ws);
             break;
         }
     });
 });
 function makeJson(eventName, data){
     return JSON.stringify({eventName : eventName, data : data});
+}
+function makeJsonPos(socketID,vector2){
+    return JSON.stringify({eventName : 'otherPosition',socketID : socketID,x:vector2.x,y:vector2.y});
 }
 function connected(wws){
     wws.send(makeJson('connected','잘 연결되었단다!'));
@@ -29,6 +33,11 @@ function updatePlayerPos(json){
     console.log(json.socketID+'님의 위치는'+x+y+'입니다.');
     let player=playersMap[json.socketID];
     player.vector2={x,y};
+}
+function initOtherPlayer(wws){
+    players.forEach(element => {
+        wws.send(makeJson("initOtherPlayer",element.socketID));
+    });
 }
 class user {
     constructor(socketID) { 
@@ -40,18 +49,16 @@ class user {
 }     
 var players=new Array();//플레이어 리스트
 var playersMap={};//플레이어 맵
-function joinGame(json){
+function joinGame(json,wws){
     console.log(json.socketID+'님이 입장하였습니다.');
     let tmpUser= new user(json.socketID);
+    initOtherPlayer(wws);
     players.push(tmpUser);
     playersMap[json.socketID]=tmpUser;
     return tmpUser;   
 }
-function leaveGame(socket) { 
-    for (let i = 0; i < balls.length; ++i) { 
-        if (balls[i].id == socket.id) { 
-            balls.splice(i, 1); break; 
-        } 
+function updateOtherPos(wws){
+    for(let i=0;i<players.length;i++){
+        wws.send(makeJsonPos(players[i].socketID,playersMap[players[i].socketID].vector2));
     }
-    delete ballMap[socket.id]; 
 }
