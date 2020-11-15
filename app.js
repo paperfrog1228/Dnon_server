@@ -19,6 +19,16 @@ wws.on("connection", function(ws) {
         }
     });
 });
+wws.broadcast = function broadcast(data) {
+    wws.clients.forEach(function each(client) {
+      console.log('IT IS GETTING INSIDE CLIENTS');
+      //console.log(client);
+  
+
+      console.log(data);
+      client.send(data);
+    });
+  };
 function makeJson(eventName, data){
     return JSON.stringify({eventName : eventName, data : data});
 }
@@ -55,7 +65,12 @@ function joinGame(json,wws){
     initOtherPlayer(wws);
     players.push(tmpUser);
     playersMap[json.socketID]=tmpUser;
+    notifyNewPlayer(json.socketID);
     return tmpUser;   
+}
+
+function notifyNewPlayer(socketID){
+    wws.broadcast(makeJson("notifyNewPlayer",socketID));
 }
 function updateOtherPos(wws){
     for(let i=0;i<players.length;i++){
