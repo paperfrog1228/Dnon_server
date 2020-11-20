@@ -36,10 +36,22 @@ function makeJson(eventName, data){
     return JSON.stringify({eventName : eventName, data : data});
 }
 function makeJsonUser(eventName ,user){
-    return JSON.stringify({eventName : eventName, socketID : user.socketID, nickname : user.nickname , type : user.type});
+    return JSON.stringify({eventName : eventName, 
+        socketID : user.socketID, 
+        nickname : user.nickname , 
+        type : user.type,
+        x : user.vector2.x,
+        y : user.vector2.y});
 }
 function makeJsonState(p){
-    return JSON.stringify({eventName : 'receiveOtherState',socketID : p.socketID,x:p.vector2.x,y:p.vector2.y,state:p.state,dir:p.dir,hp:p.hp});
+    return JSON.stringify(
+        {eventName : 'receiveOtherState',
+        socketID : p.socketID,
+        x:p.vector2.x,
+        y:p.vector2.y,
+        state:p.state,
+        dir:p.dir,
+        hp:p.hp});
 }
 function makeJsonFlask(flask){
     return JSON.stringify({eventName : 'receiveAttackChemical',socketID : flask.socketID,x1:flask.x1,y1:flask.y1,x2:flask.x2,y2:flask.y2});
@@ -90,7 +102,7 @@ function joinGame(json,wws){
     initOtherPlayer(wws);
     players.push(tmpUser);
     playersMap[json.socketID]=tmpUser;
-    notifyNewPlayer(json);
+    notifyNewPlayer(tmpUser);
     return tmpUser;   
 }
 
