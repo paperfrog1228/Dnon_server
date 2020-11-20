@@ -15,6 +15,10 @@ wws.on("connection", function(ws) {
                 updatePlayerState(json);
                 updateOtherPos(ws);
             break;
+            case 'chemicalAttack':
+                let tmpflask=new flask(json.socketID,json.x1,json.x2,json.y1,json.y2);
+                updateObject(tmpflask);
+            break;
         }
     });
 });
@@ -37,6 +41,9 @@ function makeJsonUser(eventName ,user){
 function makeJsonState(p){
     return JSON.stringify({eventName : 'receiveOtherState',socketID : p.socketID,x:p.vector2.x,y:p.vector2.y,state:p.state,dir:p.dir,hp:p.hp});
 }
+function makeJsonFlask(flask){
+    return JSON.stringify({eventName : 'receiveAttackChemical',socketID : flask.socketID,x1:flask.x1,y1:flask.y1,x2:flask.x2,y2:flask.y2});
+}
 function connected(wws){
     wws.send(makeJson('connected','잘 연결되었단다!'));
 }
@@ -52,6 +59,15 @@ function initOtherPlayer(wws){
     players.forEach(element => {
         wws.send(makeJsonUser("initOtherPlayer",element));
     });
+}
+class flask{
+    constructor(socketID,x1,x2,y1,y2){
+        this.socketID=socketID;
+        this.x1=x1;
+        this.y1=y1;
+        this.x2=x2;
+        this.y2=y2;
+    }
 }
 class user {
     constructor(socketID,nickname,type) { 
@@ -85,4 +101,7 @@ function updateOtherPos(wws){
     for(let i=0;i<players.length;i++){
         wws.send(makeJsonState(players[i]));
     }
+}
+function updateObject(flask){
+    wws.broadcast(makeJsonFlask(flask));
 }
