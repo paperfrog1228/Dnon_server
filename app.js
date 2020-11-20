@@ -19,16 +19,25 @@ wws.on("connection", function(ws) {
                 let tmpflask=new flask(json.socketID,json.x1,json.x2,json.y1,json.y2);
                 updateObject(tmpflask);
             break;
+            case 'exitUser':
+                exitUser(json);
+            break;
         }
     });
+    ws.on('close',() =>
+    {   
+        console.log("누군가 나갔네");
+        //Remove client from Set once their connection is closed
+       // clients.delete(ws)
+    })
 });
 wws.broadcast = function broadcast(data) {
     wws.clients.forEach(function each(client) {
+
       console.log('IT IS GETTING INSIDE CLIENTS');
       //console.log(client);
-  
-
       console.log(data);
+      if(client!=null)
       client.send(data);
     });
   };
@@ -105,7 +114,14 @@ function joinGame(json,wws){
     notifyNewPlayer(tmpUser);
     return tmpUser;   
 }
+function exitUser(user){
+    socketID=user.socketID;
+    wws.broadcast(makeJson("exitOther"),socketID);
+    for (let i = 0; i < players.length; ++i) { 
+        if (players[i].socketID == socketID) { players.splice(i, 1); break; } }
+    delete playersMap[socketID];
 
+}
 function notifyNewPlayer(user){
     wws.broadcast(makeJsonUser("notifyNewPlayer",user));
 }
