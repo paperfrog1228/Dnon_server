@@ -10,6 +10,7 @@ wws.on("connection", function(ws) {
         switch(json.eventName) {
             case 'join':
                 joinGame(json,ws);
+                console.log(json);
             break;
             case 'sendState': //heartbeat 역할
                 updatePlayerState(json);
@@ -18,6 +19,7 @@ wws.on("connection", function(ws) {
             case 'chemicalAttack':
                 let tmpflask=new flask(json.socketID,json.x1,json.x2,json.y1,json.y2);
                 updateObject(tmpflask);
+                console.log(json);
             break;
             case 'exitUser':
                 exitUser(json);
@@ -28,13 +30,11 @@ wws.on("connection", function(ws) {
     {   
         console.log("누군가 나갔네");
         //Remove client from Set once their connection is closed
-       // clients.delete(ws)
+        clients.delete(ws)
     })
 });
 wws.broadcast = function broadcast(data) {
     wws.clients.forEach(function each(client) {
-
-      console.log('IT IS GETTING INSIDE CLIENTS');
       //console.log(client);
       console.log(data);
       if(client!=null)
