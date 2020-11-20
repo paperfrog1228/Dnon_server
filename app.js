@@ -11,8 +11,8 @@ wws.on("connection", function(ws) {
             case 'join':
                 joinGame(json,ws);
             break;
-            case 'position': //heartbeat 역할
-                updatePlayerPos(json);
+            case 'sendState': //heartbeat 역할
+                updatePlayerState(json);
                 updateOtherPos(ws);
             break;
         }
@@ -34,17 +34,19 @@ function makeJson(eventName, data){
 function makeJsonUser(eventName ,user){
     return JSON.stringify({eventName : eventName, socketID : user.socketID, nickname : user.nickname , type : user.type});
 }
-function makeJsonPos(socketID,vector2){
-    return JSON.stringify({eventName : 'otherPosition',socketID : socketID,x:vector2.x,y:vector2.y});
+function makeJsonState(p){
+    return JSON.stringify({eventName : 'receiveOtherState',socketID : p.socketID,x:p.vector2.x,y:p.vector2.y,state:p.state,dir:p.dir,hp:p.hp});
 }
 function connected(wws){
     wws.send(makeJson('connected','잘 연결되었단다!'));
 }
-function updatePlayerPos(json){
+function updatePlayerState(json){
     var x=json.x,y=json.y;
-    //console.log(json.socketID+'님의 위치는'+x+y+'입니다.');
     let player=playersMap[json.socketID];
     player.vector2={x,y};
+    player.state=json.state;
+    player.dir=json.dir;
+    player.hp=json.hp;
 }
 function initOtherPlayer(wws){
     players.forEach(element => {
@@ -57,6 +59,9 @@ class user {
         this.nickname=nickname;
         this.vector2={0:0}; 
         this.type=type;
+        this.state=0;
+        this.dir=0;
+        this.hp=0;
     } 
     get id() {  return this.socketID; } 
     get pos(){  return this.vector2;} 
@@ -78,6 +83,6 @@ function notifyNewPlayer(user){
 }
 function updateOtherPos(wws){
     for(let i=0;i<players.length;i++){
-        wws.send(makeJsonPos(players[i].socketID,playersMap[players[i].socketID].vector2));
+        wws.send(makeJsonState(players[i]));
     }
 }
